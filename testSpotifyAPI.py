@@ -2,13 +2,17 @@ import spotipy
 import json
 from spotipy.oauth2 import SpotifyClientCredentials
 
-auth_manager = SpotifyClientCredentials()
-sp = spotipy.Spotify(auth_manager=auth_manager)
+client_credentials_manager = SpotifyClientCredentials()
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-user = sp.user('22wtiqz6ow2wcjaoopq5k4vyy')
+urn = "spotify:artist:3jOstUTkEu2JkjvRdBA5Gu"
+sp = spotipy.Spotify()
 
+sp.trace = True  # turn on tracing
+sp.trace_out = True  # turn on trace out
+
+artist = sp.artist(urn)
+print(artist)
+
+user = sp.user("plamere")
 print(user)
-
-#device = sp.devices(user)
-
-#print(device)

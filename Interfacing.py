@@ -8,15 +8,15 @@ from mfrc522 import SimpleMFRC522
 reader = SimpleMFRC522()
 
 try:
-        id, text = reader.read()
-        print(id)
-        print(text)
-        #take text stored and convert to suitable url
-        #expect URI such as spotify:album:7n3QJc7TBOxXtlYh4Ssll8 (Adele album 21)
-        spotifyURI = text
-        devices()
-
+    id, text = reader.read()
+    print(id)
+    print(text)
+    # take text stored and convert to suitable url
+    # expect URI such as spotify:album:7n3QJc7TBOxXtlYh4Ssll8 (Adele album 21)
+    spotifyURI = text
+    devices()
 
 
 finally:
-        GPIO.cleanup()
+    GPIO.cleanup()
+

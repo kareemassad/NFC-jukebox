@@ -1,18 +1,15 @@
-import spotipy
-import json
 from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy
+import sys
+import pprint
+
+if len(sys.argv) > 1:
+    username = sys.argv[1]
+else:
+    username = 'plamere'
 
 client_credentials_manager = SpotifyClientCredentials()
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
-urn = "spotify:artist:3jOstUTkEu2JkjvRdBA5Gu"
-sp = spotipy.Spotify()
-
-sp.trace = True  # turn on tracing
-sp.trace_out = True  # turn on trace out
-
-artist = sp.artist(urn)
-print(artist)
-
-user = sp.user("plamere")
-print(user)
+sp.trace = True
+user = sp.user(username)
+pprint.pprint(user)

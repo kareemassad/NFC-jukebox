@@ -3,13 +3,11 @@ import spotipy
 import sys
 import pprint
 
-if len(sys.argv) > 1:
-    username = sys.argv[1]
-else:
-    username = 'plamere'
+username = '22wtiqz6ow2wcjaoopq5k4vyy'
 
 client_credentials_manager = SpotifyClientCredentials()
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-sp.trace = True
+
+#sp.trace = True
 user = sp.user(username)
 pprint.pprint(user)

@@ -11,6 +11,6 @@ scope = 'user-read-playback-state'
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
 sp.trace = True
-#user = sp.user(username)
+user = sp.user(username)
 allDevices = sp.devices()
 pprint.pprint(allDevices)

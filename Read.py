@@ -9,6 +9,7 @@ reader = SimpleMFRC522()
 
 try:
         id, text = reader.read()
+        print("Place your tag to be read!")
         #id represents the unique serial number of each tag
         getSpotifyURI(id)
         print(id)

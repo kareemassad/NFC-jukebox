@@ -5,6 +5,19 @@ from mfrc522 import SimpleMFRC522
 import csv
 from extractURI import getSpotifyURI
 
+"""[summary]
+Given an ID type integer, return the corresponding spotify URI
+"""
+def getSpotifyURI(ID):
+        file = open('spotifyURICollection.csv', encoding='utf-8-sig')
+        csv_file = csv.DictReader(file)
+        for row in csv_file:
+                #print(row['ID'])
+                if(ID == row['ID']):
+                        URI = row['URI']
+                        print(URI)
+                        return URI
+
 reader = SimpleMFRC522()
 
 try:

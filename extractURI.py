@@ -11,7 +11,7 @@ def getSpotifyURI(ID):
             print(URI)
             return URI
 
-file = open('spotifyURICollection.csv', newline='', encoding='utf-8-sig')
+file = open('spotifyURICollection.csv', encoding='utf-8-sig')
 csv_file = csv.DictReader(file)
 
 #getSpotifyURI('filler')

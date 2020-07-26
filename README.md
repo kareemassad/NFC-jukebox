@@ -16,3 +16,10 @@ Tap to play music
 2) Configure PI with ssh and ftp
 3) Build RC522 circuit
 4) interface with stereo system and spotify
+
+## To start
+
+pipenv shell
+jupyter notebook
+
+## Dependencies

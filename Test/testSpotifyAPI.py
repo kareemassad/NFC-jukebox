@@ -12,23 +12,16 @@ def playTrack(trackURI):
     return spotifyObject.start_playback("31876612233caf235184b622d80c84b51b39cc36", None ,trackURI)
 
 def getAlbumTracks(albumURI):
-    #result is now a dict
-    # track = spotifyObject.current_user_playing_track()
-    # print(json.dumps(track, sort_keys=True, indent=4))
-    # artist = track['item']['artists'][0]['name']
-    # print(artist)
-    # track = track['item']['name']
-    # print(track)
     i = 0
     n = 50
     result = spotifyObject.album_tracks(albumURI, n, 0 ,None)
 
-    #append all track URIs into list trackURIs
-    trackURIs = []
+    #append all track URIs into list tracks
+    tracks = []
     for n in range(len(result['items'])):
         trackLinks = result['items'][n]['uri']
-        trackURIs.append(trackLinks)
-    return trackURIs
+        tracks.append(trackLinks)
+    return tracks
 
 #username from spotify main page
 username = '22wtiqz6ow2wcjaoopq5k4vyy'
@@ -46,20 +39,22 @@ except (AttributeError, JSONDecodeError):
 spotifyObject = spotipy.Spotify(auth=token)
 
 #what device is playing
-devices = spotifyObject.devices()
-print(json.dumps(devices, sort_keys=True, indent=4))
-deviceID = devices['devices'][1]['id']
-print(deviceID)
+#devices = spotifyObject.devices()
+#print(json.dumps(devices, sort_keys=True, indent=4))
+#deviceID = devices['devices'][1]['id']
+#print(deviceID)
+
 #get user information
 user = spotifyObject.current_user()
 displayName = user['display_name']
 follower = user['followers']['total']
 #print(user, displayName, follower)
 
-#Play a track
-#trackURI = ['spotify:track:6SJLngO5LfdEldlJd1MWCs']
-#playTrack(trackURI)
-
+#give album
 albumURI = 'spotify:album:37rNuexqEXWeSIOiJtn3A9'
 albumtracks = getAlbumTracks(albumURI)
-print(getAlbumTracks(albumURI))
+tracks = print(getAlbumTracks(albumURI))
+
+#Play a track
+#trackURI = ['spotify:track:6SJLngO5LfdEldlJd1MWCs']
+playTrack(tracks)

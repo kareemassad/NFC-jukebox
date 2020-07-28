@@ -3,6 +3,13 @@
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 import csv
+import os
+import sys
+import json
+import spotipy
+import webbrowser
+import spotipy.util as util
+from json.decoder import JSONDecodeError
 
 
 def getSpotifyURI(ID):

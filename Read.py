@@ -38,27 +38,7 @@ def playSpotify(contextURI, deviceID):
     """
     # "31876612233caf235184b622d80c84b51b39cc36"
     spotifyObject.start_playback(deviceID, contextURI, None)
-
-
-def getAlbumTracks(albumURI):
-    """This method takes an album URI and returns a list containing all of the URIs for the tracks in it. No longer required with the latest spotify update
-
-    Args:
-        albumURI (String): [A spotify album URI]
-
-    Returns:
-        tracks(list of strings): [Contains the album's tracks as spotify URI links]
-    """
-    i = 0
-    n = 50
-    result = spotifyObject.album_tracks(albumURI, n, 0, None)
-
-    # append all track URIs into list tracks
-    tracks = []
-    for n in range(len(result['items'])):
-        trackLinks = result['items'][n]['uri']
-        tracks.append(trackLinks)
-    return tracks
+    print("It has played on the" + deviceID)
 
 
 def findDeviceID():
@@ -99,26 +79,18 @@ except (AttributeError, JSONDecodeError):
 
 # create a spotify object
 spotifyObject = spotipy.Spotify(auth=token)
-# give album
-albumURI = 'spotify:album:7n3QJc7TBOxXtlYh4Ssll8'
-# get device to play on
-deviceID = findDeviceID()
-# play the album
-playSpotify(albumURI, deviceID)
-
 reader = SimpleMFRC522()
 
 try:
     print("Place your tag to be read!")
-    id, text = reader.read()
     # id represents the unique serial number of each tag
+    id, text = reader.read()
     # access data in URI variable
-    getSpotifyURI(id)
-    # pass URI variable in new function that interfaces with spotify
-    # TODO: Create a new function that plays a song on spotify based on the URI
-
-    print(id)
-    # text represents the text written to the tag
-    # print(text)
+    albumURI = getSpotifyURI(id)
+    print("That id represents this album:" + albumURI)
+    # get device to play on
+    deviceID = findDeviceID()
+    # play the album
+    playSpotify(albumURI, deviceID)
 finally:
     GPIO.cleanup()

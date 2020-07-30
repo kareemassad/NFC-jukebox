@@ -23,13 +23,13 @@ def getSpotifyURI(ID):
         URI ([String]): [A spotify URI pulled from a .csv file that directly coressponds a specific ID]
     """
 
-    file = open('spotifyURICollection.csv', encoding='utf-8-sig')
+    file = open("spotifyURICollection.csv", encoding="utf-8-sig")
     csv_file = csv.DictReader(file)
     for row in csv_file:
         # print(row['ID'])
         # DONE: concantinate ID to a string
-        if(str(ID) == row['ID']):
-            URI = row['URI']
+        if str(ID) == row["ID"]:
+            URI = row["URI"]
             print(URI)
             return URI
     # Base Case
@@ -57,24 +57,24 @@ def findDeviceID():
     """
     # get all active devices
     result = spotifyObject.devices()
-    #print(json.dumps(result, sort_keys=True, indent=4))
+    # print(json.dumps(result, sort_keys=True, indent=4))
 
     # Store all device ID's found in a list
     devices = []
-    for n in range(len(result['devices'])):
-        deviceID = result['devices'][n]['id']
+    for n in range(len(result["devices"])):
+        deviceID = result["devices"][n]["id"]
         devices.append(deviceID)
 
         # if spotify speaker exists, play on it. Otherwise, play on whatever.
-        if(deviceID == "31876612233caf235184b622d80c84b51b39cc36"):
+        if deviceID == "31876612233caf235184b622d80c84b51b39cc36":
             return deviceID
     # Play on whatever is available first.
     # print(devices[0])
     return devices[0]
 
 
-username = '22wtiqz6ow2wcjaoopq5k4vyy'
-scope = 'user-read-private user-modify-playback-state user-read-playback-state'
+username = "22wtiqz6ow2wcjaoopq5k4vyy"
+scope = "user-read-private user-modify-playback-state user-read-playback-state"
 
 # authentication
 # remember to add cache to .gitignore
@@ -89,15 +89,24 @@ spotifyObject = spotipy.Spotify(auth=token)
 reader = SimpleMFRC522()
 
 try:
-    print("Place your tag to be read!")
+    print("Place your tag to be read !")
     # id represents the unique serial number of each tag
     id, text = reader.read()
+
+    if isinstance(id, int):
+        pass
+    else:
+        print("ID is not an int")
+        sys.exit()
+
     # access data in URI variable
     albumURI = getSpotifyURI(id)
-    print("That id represents this album:" + albumURI)
+    print("That id represents this album: " + albumURI)
     # get device to play on
     deviceID = findDeviceID()
     # play the album
     playSpotify(albumURI, deviceID)
+
+
 finally:
     GPIO.cleanup()

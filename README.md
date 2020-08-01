@@ -1,6 +1,6 @@
 # NFC-jukebox
 
-Tap to play music
+A modern approach to the old vinyl record player. Vinyl players these days have two main issues. They are inconvenient and very expensive. This project aims to tackle those issues using NFC. You simply tap the NFC album cards and the album plays on spotify.
 
 ## Required Gear
 
@@ -8,18 +8,3 @@ Tap to play music
 2) RC522 RFID Chip
 3) RFID Cards
 4) 16GB SD Card
-5) Arduino Uno
-
-## Plan
-
-1) Create an express web server
-2) Configure PI with ssh and ftp
-3) Build RC522 circuit
-4) interface with stereo system and spotify
-
-## To start
-
-pipenv shell
-jupyter notebook
-
-## Dependencies

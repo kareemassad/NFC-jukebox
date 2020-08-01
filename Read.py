@@ -45,7 +45,7 @@ def playSpotify(contextURI, deviceID):
     """
     # "31876612233caf235184b622d80c84b51b39cc36"
     spotifyObject.start_playback(deviceID, contextURI, None)
-    print("It has played on the" + deviceID)
+    print("It has played on this device: " + deviceID)
 
 
 def findDeviceID():
@@ -89,24 +89,24 @@ spotifyObject = spotipy.Spotify(auth=token)
 reader = SimpleMFRC522()
 
 try:
-    print("Place your tag to be read !")
-    # id represents the unique serial number of each tag
-    id, text = reader.read()
+    while(True):
+        print("Place your tag to be read !")
+        # id represents the unique serial number of each tag
+        id, text = reader.read()
 
-    if isinstance(id, int):
-        pass
-    else:
-        print("ID is not an int")
-        sys.exit()
+        if isinstance(id, int):
+            pass
+        else:
+            print("ID is not an int")
+            sys.exit()
 
-    # access data in URI variable
-    albumURI = getSpotifyURI(id)
-    print("That id represents this album: " + albumURI)
-    # get device to play on
-    deviceID = findDeviceID()
-    # play the album
-    playSpotify(albumURI, deviceID)
-
+        # access data in URI variable
+        albumURI = getSpotifyURI(id)
+        print("That id represents this album: " + albumURI)
+        # get device to play on
+        deviceID = findDeviceID()
+        # play the album
+        playSpotify(albumURI, deviceID)
 
 finally:
     GPIO.cleanup()

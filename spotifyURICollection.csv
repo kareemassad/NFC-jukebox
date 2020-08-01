@@ -1,4 +1,12 @@
-﻿ID,Artist,Album,URI
-622616457857,Beach Boys,Smiley Smile,spotify:album:37rNuexqEXWeSIOiJtn3A9
-filler1,Beach Boys,Endless Summer,spotify:album:05J8PFXdYKeYNb8YjqqJYr
-filler2,Adele,21,spotify:album:7n3QJc7TBOxXtlYh4Ssll8
+ID,Artist,Album,URI,Count
+622616457857,Beach Boys,Smiley Smile,spotify:album:37rNuexqEXWeSIOiJtn3A9,0
+584197670252,Beach Boys,Endless Summer,spotify:album:05J8PFXdYKeYNb8YjqqJYr,1
+584198718844,Adele,21,spotify:album:7n3QJc7TBOxXtlYh4Ssll8,2
+584198456696,,,,3
+584198194532,,,,4
+,,,,5
+,,,,6
+,,,,7
+,,,,8
+,,,,9
+,,,,10

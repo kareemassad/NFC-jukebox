@@ -72,6 +72,9 @@ def findDeviceID():
     # print(devices[0])
     return devices[0]
 
+client_id='47b1df84dd804a17a77ddab564c05f79' 
+client_secret='67681af49c0041959131bad5973529b6' 
+redirect_uri='http://localhost:8888/callback'
 
 username = "22wtiqz6ow2wcjaoopq5k4vyy"
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
@@ -79,7 +82,7 @@ scope = "user-read-private user-modify-playback-state user-read-playback-state"
 # authentication
 # remember to add cache to .gitignore
 try:
-    token = util.prompt_for_user_token(username, scope)
+    token = util.prompt_for_user_token(username, scope, client_id, client_secret, redirect_uri)
 except (AttributeError, JSONDecodeError):
     os.remove(f".cache-{username}")
     token = util.prompt_for_user_token(username, scope)
@@ -93,7 +96,7 @@ try:
         print("Place your tag to be read !")
         # id represents the unique serial number of each tag
         id, text = reader.read()
-
+        print(id)
         if isinstance(id, int):
             pass
         else:
@@ -103,10 +106,11 @@ try:
         # access data in URI variable
         albumURI = getSpotifyURI(id)
         print("That id represents this album: " + albumURI)
+        if albumURI == "no match found":
+            sys.exit()
         # get device to play on
         deviceID = findDeviceID()
         # play the album
         playSpotify(albumURI, deviceID)
-
 finally:
     GPIO.cleanup()

@@ -6,5 +6,8 @@ A modern approach to the old vinyl record player. Vinyl players these days have 
 
 1) Raspberry Pi 3B+
 2) RC522 RFID Chip
-3) RFID Cards
+3) RFID Cards/Stickers
 4) 16GB SD Card
+
+## To Run
+

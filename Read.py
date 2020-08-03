@@ -94,20 +94,23 @@ spotifyObject = spotipy.Spotify(auth=token)
 reader = SimpleMFRC522()
 
 try:
+    usedID = 000
     while(True):
         print("Place your tag to be read !")
         # id represents the unique serial number of each tag
         id, text = reader.read()
         print(id)
 
-        # access data in URI variable
-        albumURI = getSpotifyURI(id)
-        print("That id represents this album: " + albumURI)
-        if albumURI == "no match found":
-            sys.exit()
-        # get device to play on
-        deviceID = findDeviceID()
-        # play the album
-        playSpotify(albumURI, deviceID)
+        if(usedID != id):
+            # access data in URI variable
+            albumURI = getSpotifyURI(id)
+            print("That id represents this album: " + albumURI)
+            if albumURI == "no match found":
+                sys.exit()
+            # get device to play on
+            deviceID = findDeviceID()
+            # play the album
+            playSpotify(albumURI, deviceID)
+        usedID = id
 finally:
     GPIO.cleanup()

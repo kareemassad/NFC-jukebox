@@ -23,7 +23,7 @@ def getSpotifyURI(ID):
         URI ([String]): [A spotify URI pulled from a .csv file that directly coressponds a specific ID]
     """
 
-    file = open("spotifyURICollection.csv", encoding="utf-8-sig")
+    file = open("spotifyURICollection.csv", encoding="cp1252")
     csv_file = csv.DictReader(file)
     for row in csv_file:
         # print(row['ID'])

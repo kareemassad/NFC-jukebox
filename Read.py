@@ -10,6 +10,7 @@ import spotipy
 import webbrowser
 import spotipy.util as util
 from json.decoder import JSONDecodeError
+from pushbullet.pushbullet import PushBullet
 
 
 def getSpotifyURI(ID):
@@ -77,6 +78,7 @@ def findDeviceID():
 client_id = '47b1df84dd804a17a77ddab564c05f79'
 client_secret = '67681af49c0041959131bad5973529b6'
 redirect_uri = 'http://localhost:8888/callback'
+api_key = YOUR_KEY_HERE
 
 username = "22wtiqz6ow2wcjaoopq5k4vyy"
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
@@ -113,5 +115,14 @@ try:
             # play the album
             playSpotify(albumURI, deviceID)
         usedID = id
+else:
+    pb = PushBullet(api_key)
+
+    # Get a list of devices
+    devices = pb.getDevices()
+    print(devices)
+
+    # Send a note
+    pb.pushNote(devices[1]["iden"], 'Hello world', 'Test body')
 finally:
     GPIO.cleanup()

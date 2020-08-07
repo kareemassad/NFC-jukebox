@@ -73,6 +73,7 @@ def findDeviceID():
     return devices[0]
 
 
+# exposing api key for now will get new and reset when done
 client_id = '47b1df84dd804a17a77ddab564c05f79'
 client_secret = '67681af49c0041959131bad5973529b6'
 redirect_uri = 'http://localhost:8888/callback'

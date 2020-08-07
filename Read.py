@@ -13,15 +13,19 @@ from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
 
 
-def getSpotifyURI(ID):
+def getSpotifyInfo(ID):
     """
-    Given an ID type integer, return the corresponding spotify URI
+    Given an id type integer, return the corresponding spotify uri
 
     Args:
-        ID ([Integer]): [A unique ID given directly from each unique NFC tag]
+
+        ID (Integer): A unique id given directly from each unique nfc tag.
 
     Returns:
-        URI ([String]): [A spotify URI pulled from a .csv file that directly coressponds a specific ID]
+
+        uri (String): A spotify uri pulled from a .csv file that directly coressponds to a specific id.
+        artist (String): A spotify artist name pulled from a .csv file that directly coressponds to a specific id.
+        album (String): A spotify album name pulled from a .csv file that directly coressponds to a specific id.
     """
 
     file = open("spotifyURICollection.csv", encoding="cp1252")
@@ -30,9 +34,11 @@ def getSpotifyURI(ID):
         # print(row['ID'])
         # DONE: concantinate ID to a string
         if str(ID) == row["ID"]:
-            URI = row["URI"]
-            print(URI)
-            return URI
+            uri = row["URI"]
+            artist = row["Artist"]
+            album = row["Album"]
+            print(uri)
+            return uri, artist, album
     # Base Case
     return "no match found"
 
@@ -41,6 +47,7 @@ def playSpotify(contextURI, deviceID):
     """This method takes a context URI and a Device ID then plays said URI on the given Device
 
     Args:
+
         contextURI (String): Contains the URI of the album/artist/playlist
         deviceID (String): Contains the device ID meant for playback
     """
@@ -53,8 +60,8 @@ def findDeviceID():
     """ This method finds all devices available to play on a spotify account and returns the device to be used for playback. It always returns the ID of the Amazon Echo unless it is unavailable.
 
     Returns:
-        deviceID(String): Returns the ID of the Amazon Echo if it is available.
-        devices[0](String): If it isn't, returns the first other option.
+
+        deviceID(String): Returns the id of the Amazon Echo if it is available or the next available device
     """
     # get all active devices
     result = spotifyObject.devices()
@@ -83,6 +90,14 @@ api_key = YOUR_KEY_HERE
 username = "22wtiqz6ow2wcjaoopq5k4vyy"
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
 
+# PushBullet SMS module
+pb = PushBullet(api_key)
+
+# Get a list of devices
+devices = pb.getDevices()
+print(devices)
+
+
 # authentication
 # remember to add cache to .gitignore
 try:
@@ -106,23 +121,20 @@ try:
 
         if(usedID != id):
             # access data in URI variable
-            albumURI = getSpotifyURI(id)
-            print("That id represents this album: " + albumURI)
+            albumInfo = getSpotifyInfo(id)
+            print("That id represents this album: " + albumInfo.album)
             if albumURI == "no match found":
                 sys.exit()
             # get device to play on
             deviceID = findDeviceID()
             # play the album
-            playSpotify(albumURI, deviceID)
+            playSpotify(albumInfo.uri, deviceID)
+
+            # Send a note
+            note_title = 'Played ' + albumInfo.title
+            note_body = 'Song played on ' + deviceID
+            pb.pushNote(devices[0]["iden"], note_title, note_body)
+
         usedID = id
-else:
-    pb = PushBullet(api_key)
-
-    # Get a list of devices
-    devices = pb.getDevices()
-    print(devices)
-
-    # Send a note
-    pb.pushNote(devices[1]["iden"], 'Hello world', 'Test body')
 finally:
     GPIO.cleanup()

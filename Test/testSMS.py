@@ -9,9 +9,11 @@ pb = PushBullet(api_key)
 devices = pb.getDevices()
 print(devices)
 
-# Send a note
-pb.pushNote(devices[1]["iden"], 'Hello world', 'Test body')
+# test values
+albumURI = "1231232141sdasd"
+deviceID = "123214123212"
 
-#note_title = "Title"
-#note_body = "Body"
-#push = pb.push_note(note_title, note_body)
+# Send a note
+note_title = 'Played ' + albumURI
+note_body = 'Song played on ' + deviceID
+pb.pushNote(devices[1]["iden"], note_title, note_body)

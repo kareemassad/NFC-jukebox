@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import spotipy
+import time
 import webbrowser
 import spotipy.util as util
 from json.decoder import JSONDecodeError
@@ -82,16 +83,16 @@ def findDeviceID():
 
 
 # exposing api key for now will get new and reset when done
-client_id = '47b1df84dd804a17a77ddab564c05f79'
-client_secret = '67681af49c0041959131bad5973529b6'
-redirect_uri = 'http://localhost:8888/callback'
-api_key = YOUR_KEY_HERE
+client_id = "47b1df84dd804a17a77ddab564c05f79"
+client_secret = "67681af49c0041959131bad5973529b6"
+redirect_uri = "http://localhost:8888/callback"
+pushbullet_api_key = YOUR_KEY_HERE
 
 username = "22wtiqz6ow2wcjaoopq5k4vyy"
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
 
 # PushBullet SMS module
-pb = PushBullet(api_key)
+pb = PushBullet(pushbullet_api_key)
 
 # Get a list of devices
 devices = pb.getDevices()
@@ -102,7 +103,8 @@ print(devices)
 # remember to add cache to .gitignore
 try:
     token = util.prompt_for_user_token(
-        username, scope, client_id, client_secret, redirect_uri)
+        username, scope, client_id, client_secret, redirect_uri
+    )
 except (AttributeError, JSONDecodeError):
     os.remove(f".cache-{username}")
     token = util.prompt_for_user_token(username, scope)
@@ -113,13 +115,13 @@ reader = SimpleMFRC522()
 
 try:
     usedID = 000
-    while(True):
+    while True:
         print("Place your tag to be read !")
         # id represents the unique serial number of each tag
         id, text = reader.read()
         print(id)
 
-        if(usedID != id):
+        if usedID != id:
             # access data in URI variable
             albumInfo = getSpotifyInfo(id)
             print("That id represents this album: " + albumInfo.album)
@@ -131,10 +133,12 @@ try:
             playSpotify(albumInfo.uri, deviceID)
 
             # Send a note
-            note_title = 'Played ' + albumInfo.title
-            note_body = 'Song played on ' + deviceID
+            note_title = "Played " + albumInfo.title
+            note_body = "Song played on " + deviceID
             pb.pushNote(devices[0]["iden"], note_title, note_body)
 
         usedID = id
+        # slight time delay to handle requests better
+        time.sleep(2)
 finally:
     GPIO.cleanup()

@@ -41,7 +41,7 @@ def getSpotifyInfo(ID):
             print(uri)
             return uri, artist, album
     # Base Case
-    return "no match found"
+    return False
 
 
 def playSpotify(contextURI, deviceID):
@@ -124,16 +124,16 @@ try:
         if usedID != id:
             # access data in URI variable
             albumInfo = getSpotifyInfo(id)
-            print("That id represents this album: " + albumInfo.album)
-            if albumURI == "no match found":
+            print("That id represents this album: " + albumInfo[2])
+            if albumInfo == False:
                 sys.exit()
             # get device to play on
             deviceID = findDeviceID()
             # play the album
-            playSpotify(albumInfo.uri, deviceID)
+            playSpotify(albumInfo[0], deviceID)
 
             # Send a note
-            note_title = "Played " + albumInfo.title
+            note_title = "Played " + albumInfo[2]
             note_body = "Song played on " + deviceID
             pb.pushNote(devices[0]["iden"], note_title, note_body)
 

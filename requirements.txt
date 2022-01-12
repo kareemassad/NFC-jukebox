@@ -1,6 +1,6 @@
 pathspec==0.8.0
 pep8==1.7.1
-pipenv==2020.6.2
+pipenv==2022.1.8
 pushbullet==0.1
 pushbullet.py==0.11.0
 pycodestyle==2.6.0

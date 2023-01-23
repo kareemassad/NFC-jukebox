@@ -5,6 +5,6 @@ pushbullet==0.1
 pushbullet.py==0.11.0
 pycodestyle==2.6.0
 pycparser==2.20
-spotipy==2.13.0
+spotipy==2.22.1
 text-unidecode==1.3
 websocket-client==0.57.0

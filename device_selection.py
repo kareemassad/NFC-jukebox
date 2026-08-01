@@ -1,25 +1,10 @@
 import time
 
 from collections.abc import Mapping
+from spotify_retry import is_retryable_exception
 
 
 PHONE_DEVICE_TYPES = frozenset(("phone", "smartphone"))
-
-
-def is_retryable_exception(error, retryable_exceptions):
-    if not isinstance(error, retryable_exceptions):
-        return False
-
-    status = getattr(error, "http_status", None)
-    if status is None:
-        response = getattr(error, "response", None)
-        status = getattr(response, "status_code", None)
-    if status is None:
-        return True
-    if not isinstance(status, int):
-        return False
-
-    return status == 429 or 500 <= status < 600
 
 
 def select_device_id(devices, preferred_device_id=None):
@@ -60,7 +45,7 @@ def wait_for_device(
         try:
             devices = fetch_devices()
         except retryable_exceptions as error:
-            if not is_retryable_exception(error, retryable_exceptions):
+            if not is_retryable_exception(error):
                 raise
             log("Spotify device lookup failed: " + str(error))
             sleep(retry_seconds)

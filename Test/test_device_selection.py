@@ -113,6 +113,30 @@ class SelectDeviceIdTests(unittest.TestCase):
         )
         self.assertEqual(sleeps, [5])
 
+    def test_retries_request_timeout(self):
+        responses = [
+            HttpError(408),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
     def test_propagates_permanent_http_error(self):
         def fetch_devices():
             raise HttpError(401)

@@ -59,6 +59,39 @@ class PlayWithRetryTests(unittest.TestCase):
         )
         self.assertEqual(sleeps, [5])
 
+    def test_retries_when_playback_device_is_missing(self):
+        devices = iter(["speaker-1", "computer-1"])
+        attempts = []
+        sleeps = []
+
+        def find_device():
+            return next(devices)
+
+        def play(context_uri, device_id):
+            attempts.append((context_uri, device_id))
+            if len(attempts) == 1:
+                raise HttpError(404)
+
+        self.assertEqual(
+            play_with_retry(
+                play,
+                "spotify:album:42",
+                find_device,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "computer-1",
+        )
+        self.assertEqual(
+            attempts,
+            [
+                ("spotify:album:42", "speaker-1"),
+                ("spotify:album:42", "computer-1"),
+            ],
+        )
+        self.assertEqual(sleeps, [5])
+
     def test_propagates_permanent_playback_error(self):
         def play(context_uri, device_id):
             raise HttpError(401)

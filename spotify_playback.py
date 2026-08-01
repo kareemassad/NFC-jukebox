@@ -1,6 +1,6 @@
 import time
 
-from device_selection import is_retryable_exception
+from spotify_retry import is_retryable_playback_exception
 
 
 def play_with_retry(
@@ -18,7 +18,7 @@ def play_with_retry(
             play(context_uri, device_id)
             return device_id
         except retryable_exceptions as error:
-            if not is_retryable_exception(error, retryable_exceptions):
+            if not is_retryable_playback_exception(error):
                 raise
             log("Spotify playback failed: " + str(error))
             sleep(retry_seconds)

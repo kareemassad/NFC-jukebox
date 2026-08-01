@@ -1,7 +1,7 @@
 import unittest
 
 import device_selection
-from Test.helpers import HttpError
+from Test.helpers import HttpError, NoStatusError
 from device_selection import select_device_id
 
 
@@ -82,12 +82,37 @@ class SelectDeviceIdTests(unittest.TestCase):
             device_selection.wait_for_device(
                 fetch_devices,
                 retryable_exceptions=(RuntimeError,),
+                retryable_no_status_exceptions=(RuntimeError,),
                 sleep=sleeps.append,
                 log=lambda message: None,
             ),
             "speaker-1",
         )
         self.assertEqual(sleeps, [5])
+
+    def test_honors_retry_after_header(self):
+        responses = [
+            HttpError(429, headers={"Retry-After": "17"}),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [17.0])
 
     def test_retries_transient_http_error(self):
         responses = [
@@ -150,6 +175,33 @@ class SelectDeviceIdTests(unittest.TestCase):
                 ),
                 log=lambda message: None,
             )
+
+    def test_propagates_unknown_no_status_error(self):
+        def fetch_devices():
+            raise NoStatusError("invalid request")
+
+        with self.assertRaises(NoStatusError):
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(NoStatusError,),
+                sleep=lambda seconds: self.fail(
+                    "unknown no-status errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
+
+    def test_returns_none_after_max_attempts(self):
+        sleeps = []
+
+        self.assertIsNone(
+            device_selection.wait_for_device(
+                lambda: [],
+                max_attempts=2,
+                sleep=sleeps.append,
+                log=lambda message: None,
+            )
+        )
+        self.assertEqual(sleeps, [5])
 
     def test_retries_when_only_phone_devices_are_available(self):
         responses = [

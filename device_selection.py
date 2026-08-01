@@ -1,7 +1,7 @@
 import time
 
 from collections.abc import Mapping
-from spotify_retry import is_retryable_exception
+from spotify_retry import get_retry_after_seconds, is_retryable_exception
 
 
 PHONE_DEVICE_TYPES = frozenset(("phone", "smartphone"))
@@ -38,22 +38,35 @@ def wait_for_device(
     preferred_device_id=None,
     retry_seconds=5,
     retryable_exceptions=(),
+    retryable_no_status_exceptions=(),
+    max_attempts=12,
     sleep=time.sleep,
     log=print,
 ):
-    while True:
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+
+    for attempt in range(max_attempts):
         try:
             devices = fetch_devices()
         except retryable_exceptions as error:
-            if not is_retryable_exception(error):
+            if not is_retryable_exception(error, retryable_no_status_exceptions):
                 raise
+            if attempt + 1 == max_attempts:
+                log("Spotify device lookup failed after maximum attempts.")
+                return None
             log("Spotify device lookup failed: " + str(error))
-            sleep(retry_seconds)
+            sleep(get_retry_after_seconds(error, retry_seconds))
             continue
 
         device_id = select_device_id(devices, preferred_device_id)
         if device_id is not None:
             return device_id
 
+        if attempt + 1 == max_attempts:
+            log("No non-phone Spotify device available after maximum attempts.")
+            return None
         log("No non-phone Spotify device available. Retrying in 5 seconds.")
         sleep(retry_seconds)
+
+    return None

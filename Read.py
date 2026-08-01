@@ -10,7 +10,8 @@ import spotipy
 import time
 import webbrowser
 import spotipy.util as util
-from requests.exceptions import RequestException
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import RequestException, Timeout
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
 from spotipy.exceptions import SpotifyException
@@ -62,6 +63,7 @@ def playSpotify(contextURI, deviceID):
 
 
 PREFERRED_DEVICE_ID = "31876612233caf235184b622d80c84b51b39cc36"
+MAX_RETRY_ATTEMPTS = 12
 
 
 def findDeviceID():
@@ -70,6 +72,8 @@ def findDeviceID():
         lambda: spotifyObject.devices().get("devices", []),
         preferred_device_id=PREFERRED_DEVICE_ID,
         retryable_exceptions=(SpotifyException, RequestException),
+        retryable_no_status_exceptions=(RequestsConnectionError, Timeout),
+        max_attempts=MAX_RETRY_ATTEMPTS,
     )
 
 
@@ -124,7 +128,14 @@ try:
                 albumInfo[0],
                 findDeviceID,
                 retryable_exceptions=(SpotifyException, RequestException),
+                retryable_no_status_exceptions=(RequestsConnectionError, Timeout),
+                max_attempts=MAX_RETRY_ATTEMPTS,
             )
+
+            if deviceID is None:
+                print("No playback device available. Waiting for the next tag.")
+                usedID = id
+                continue
 
             # Send a note
             note_title = "Played " + albumInfo[2]

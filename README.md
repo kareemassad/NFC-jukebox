@@ -88,6 +88,8 @@ ID,Artist,Album,URI,Count
 `Write.py` can write text to a tag:
 
 ```bash
+cd /path/to/NFC-jukebox
+. .venv/bin/activate
 python3 Write.py
 ```
 

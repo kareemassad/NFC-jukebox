@@ -2,6 +2,8 @@
 
 Tap an NFC tag to play its album on Spotify. The project runs on a Raspberry Pi 3B+ with an RC522 reader.
 
+This build targets Raspberry Pi OS on a Raspberry Pi 3B+. It is not a general Linux build.
+
 ## Required gear
 
 1. Raspberry Pi 3B+
@@ -46,7 +48,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-The requirements file pins the `mfrc522` package at version `0.0.7`. It provides `mfrc522.SimpleMFRC522`, which is the import used by `Read.py` and `Write.py`. The included `MFRC522.py` file is a separate low-level driver.
+The requirements file pins `mfrc522==0.0.7`. This package provides `mfrc522.SimpleMFRC522`.
 
 ## Configure Spotify
 
@@ -70,7 +72,7 @@ The requirements file pins the `mfrc522` package at version `0.0.7`. It provides
 
 The first run asks for Spotify authorization. Complete the browser flow, then return to the Pi. The account must have Spotify Premium and access to the target playback device.
 
-The jukebox skips Spotify devices whose type is `phone` or `smartphone`. It selects an available non-phone Spotify Connect device, such as a computer or speaker. Pairing a Bluetooth speaker with the Pi does not make it a Spotify Connect device for this project. Use a Spotify Connect device shown by Spotify, or run a separate Spotify Connect client on the Pi.
+The jukebox skips Spotify devices whose type is `phone` or `smartphone`. Use a Spotify Connect computer or speaker. A Bluetooth speaker paired with the Pi is not a Spotify Connect device for this project.
 
 If `PUSHBULLET_API_KEY` is set, configure at least one Pushbullet target device. If the key is unset, invalid, unavailable, or the account has no target device, playback continues without notifications.
 
@@ -89,32 +91,22 @@ ID,Artist,Album,URI,Count
 
 ```bash
 cd /path/to/NFC-jukebox
-. .venv/bin/activate
-python3 Write.py
+sudo .venv/bin/python Write.py
 ```
 
 The written text is not used for album lookup. Playback uses the tag UID and the matching `ID` row in the CSV.
 
 ## Run
 
-Activate the virtual environment and start the reader:
+Use the launcher for the Raspberry Pi 3B+ build:
 
 ```bash
 cd /path/to/NFC-jukebox
-. .venv/bin/activate
-python3 Read.py
-```
-
-Then tap a registered tag. Stop the reader with `Ctrl+C`.
-
-`launcher.sh` is also available:
-
-```bash
 chmod +x launcher.sh
 ./launcher.sh
 ```
 
-The launcher finds its own project directory and runs `.venv/bin/python` as root for Pi hardware access. It does not assume a `pi` account or a fixed clone path. It passes only the documented configuration values to the root process. The launcher and direct run commands use separate token caches in the current user's home directory. If you switch between them, complete Spotify authorization once in each mode.
+The launcher uses `.venv/bin/python` with `sudo` for Pi hardware access. The launcher finds its own project directory. It does not assume a `pi` account or a fixed clone path. Do not run `Read.py` directly for normal operation. Stop the reader with `Ctrl+C`.
 
 ## Troubleshooting
 

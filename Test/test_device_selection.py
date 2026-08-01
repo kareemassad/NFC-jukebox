@@ -1,5 +1,7 @@
 import unittest
 
+import device_selection
+from Test.helpers import HttpError, NoStatusError
 from device_selection import select_device_id
 
 
@@ -62,6 +64,201 @@ class SelectDeviceIdTests(unittest.TestCase):
         ]
 
         self.assertEqual(select_device_id(devices), "speaker-1")
+
+    def test_retries_after_device_lookup_error(self):
+        responses = [
+            RuntimeError("Spotify is offline"),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(RuntimeError,),
+                retryable_no_status_exceptions=(RuntimeError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_honors_retry_after_header(self):
+        responses = [
+            HttpError(429, headers={"Retry-After": "17"}),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [17.0])
+
+    def test_uses_default_for_non_finite_retry_after(self):
+        responses = [
+            HttpError(429, headers={"Retry-After": "NaN"}),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_retries_transient_http_error(self):
+        responses = [
+            HttpError(503),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_retries_request_timeout(self):
+        responses = [
+            HttpError(408),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_propagates_permanent_http_error(self):
+        def fetch_devices():
+            raise HttpError(401)
+
+        with self.assertRaises(HttpError):
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=lambda seconds: self.fail(
+                    "permanent errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
+
+    def test_propagates_unknown_no_status_error(self):
+        def fetch_devices():
+            raise NoStatusError("invalid request")
+
+        with self.assertRaises(NoStatusError):
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(NoStatusError,),
+                sleep=lambda seconds: self.fail(
+                    "unknown no-status errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
+
+    def test_returns_none_after_max_attempts(self):
+        sleeps = []
+
+        self.assertIsNone(
+            device_selection.wait_for_device(
+                lambda: [],
+                max_attempts=2,
+                sleep=sleeps.append,
+                log=lambda message: None,
+            )
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_retries_when_only_phone_devices_are_available(self):
+        responses = [
+            [{"id": "phone-1", "type": "smartphone"}],
+            [{"id": "computer-1", "type": "computer"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            return responses.pop(0)
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "computer-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_propagates_unconfigured_device_lookup_error(self):
+        def fetch_devices():
+            raise ValueError("invalid device response")
+
+        with self.assertRaises(ValueError):
+            device_selection.wait_for_device(
+                fetch_devices,
+                sleep=lambda seconds: self.fail(
+                    "unexpected errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
 
 
 if __name__ == "__main__":

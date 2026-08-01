@@ -12,6 +12,7 @@ import webbrowser
 import spotipy.util as util
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
+from device_selection import select_device_id
 
 
 def getSpotifyInfo(ID):
@@ -57,29 +58,14 @@ def playSpotify(contextURI, deviceID):
     print("It has played on this device: " + deviceID)
 
 
+PREFERRED_DEVICE_ID = "31876612233caf235184b622d80c84b51b39cc36"
+
+
 def findDeviceID():
-    """ This method finds all devices available to play on a spotify account and returns the device to be used for playback. It always returns the ID of the Amazon Echo unless it is unavailable.
-
-    Returns:
-
-        deviceID(String): Returns the id of the Amazon Echo if it is available or the next available device
-    """
-    # get all active devices
+    """Return the preferred or first available non-phone Spotify device."""
     result = spotifyObject.devices()
-    # print(json.dumps(result, sort_keys=True, indent=4))
-
-    # Store all device ID's found in a list
-    devices = []
-    for n in range(len(result["devices"])):
-        deviceID = result["devices"][n]["id"]
-        devices.append(deviceID)
-
-        # if spotify speaker exists, play on it. Otherwise, play on whatever.
-        if deviceID == "31876612233caf235184b622d80c84b51b39cc36":
-            return deviceID
-    # Play on whatever is available first.
-    # print(devices[0])
-    return devices[0]
+    available_devices = result.get("devices", [])
+    return select_device_id(available_devices, PREFERRED_DEVICE_ID)
 
 
 # exposing api key for now will get new and reset when done
@@ -129,6 +115,10 @@ try:
                 sys.exit()
             # get device to play on
             deviceID = findDeviceID()
+            if deviceID is None:
+                print("No non-phone Spotify device available. Retrying in 5 seconds.")
+                time.sleep(5)
+                continue
             # play the album
             playSpotify(albumInfo[0], deviceID)
 

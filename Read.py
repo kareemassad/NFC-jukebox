@@ -13,6 +13,7 @@ import spotipy.util as util
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
 from device_selection import select_device_id
+from catalog import find_album
 
 
 def getSpotifyInfo(ID):
@@ -32,17 +33,7 @@ def getSpotifyInfo(ID):
 
     file = open("spotifyURICollection.csv", encoding="cp1252")
     csv_file = csv.DictReader(file)
-    for row in csv_file:
-        # print(row['ID'])
-        # DONE: concantinate ID to a string
-        if str(ID) == row["ID"]:
-            uri = row["URI"]
-            artist = row["Artist"]
-            album = row["Album"]
-            print(uri)
-            return uri, artist, album
-    # Base Case
-    return False
+    return find_album(csv_file, ID)
 
 
 def playSpotify(contextURI, deviceID):
@@ -110,9 +101,13 @@ try:
         if usedID != id:
             # access data in URI variable
             albumInfo = getSpotifyInfo(id)
+            if albumInfo is None:
+                print("No album is configured for this NFC tag.")
+                usedID = id
+                time.sleep(2)
+                continue
+
             print("That id represents this album: " + albumInfo[2])
-            if albumInfo == False:
-                sys.exit()
             # get device to play on
             deviceID = findDeviceID()
             if deviceID is None:

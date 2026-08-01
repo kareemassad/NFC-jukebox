@@ -34,7 +34,7 @@ def getSpotifyInfo(ID):
         album (String): A spotify album name pulled from a .csv file that directly coressponds to a specific id.
     """
 
-    file = open("spotifyURICollection.csv", encoding="cp1252")
+    file = open("spotifyURICollection.csv", encoding="utf-8-sig")
     csv_file = csv.DictReader(file)
     return find_album(csv_file, ID)
 
@@ -67,32 +67,48 @@ def findDeviceID():
     )
 
 
-# exposing api key for now will get new and reset when done
-client_id = "47b1df84dd804a17a77ddab564c05f79"
-client_secret = "67681af49c0041959131bad5973529b6"
-redirect_uri = "http://localhost:8888/callback"
-pushbullet_api_key = YOUR_KEY_HERE
+def required_env(name):
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(f"Set {name} before starting Read.py.")
+    return value
 
-username = "22wtiqz6ow2wcjaoopq5k4vyy"
+
+client_id = required_env("SPOTIFY_CLIENT_ID")
+client_secret = required_env("SPOTIFY_CLIENT_SECRET")
+redirect_uri = "http://127.0.0.1:8888/callback"
+pushbullet_api_key = os.environ.get("PUSHBULLET_API_KEY")
+
+username = required_env("SPOTIFY_USERNAME")
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
+token_cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "nfc-jukebox")
+os.makedirs(token_cache_dir, exist_ok=True)
+token_cache_path = os.path.join(token_cache_dir, f"spotify-{username}")
 
 # PushBullet SMS module
-pb = PushBullet(pushbullet_api_key)
-
-# Get a list of devices
-devices = pb.getDevices()
+pb = None
+devices = []
+if pushbullet_api_key:
+    try:
+        pb = PushBullet(pushbullet_api_key)
+        devices = pb.getDevices()
+    except Exception as error:
+        print("Pushbullet notifications unavailable: " + str(error))
+        pb = None
 print(devices)
 
 
 # authentication
-# remember to add cache to .gitignore
+# Store the cache outside the project so root and non-root runs do not share ownership.
 try:
     token = util.prompt_for_user_token(
-        username, scope, client_id, client_secret, redirect_uri
+        username, scope, client_id, client_secret, redirect_uri, token_cache_path
     )
 except (AttributeError, JSONDecodeError):
-    os.remove(f".cache-{username}")
-    token = util.prompt_for_user_token(username, scope)
+    os.remove(token_cache_path)
+    token = util.prompt_for_user_token(
+        username, scope, client_id, client_secret, redirect_uri, token_cache_path
+    )
 
 # create a spotify object
 spotifyObject = spotipy.Spotify(auth=token)
@@ -133,7 +149,13 @@ try:
             # Send a note
             note_title = "Played " + albumInfo[2]
             note_body = "Song played on " + deviceID
-            pb.pushNote(devices[0]["iden"], note_title, note_body)
+            if pb and devices:
+                try:
+                    pb.pushNote(devices[0]["iden"], note_title, note_body)
+                except Exception as error:
+                    print("Pushbullet notification failed: " + str(error))
+            else:
+                print("Pushbullet notifications are disabled or have no target device.")
 
         usedID = id
         # slight time delay to handle requests better

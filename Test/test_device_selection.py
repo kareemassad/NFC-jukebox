@@ -4,6 +4,12 @@ import device_selection
 from device_selection import select_device_id
 
 
+class HttpError(Exception):
+    def __init__(self, http_status):
+        super().__init__(f"HTTP {http_status}")
+        self.http_status = http_status
+
+
 class SelectDeviceIdTests(unittest.TestCase):
     def test_prefers_existing_non_phone_device(self):
         devices = [
@@ -87,6 +93,44 @@ class SelectDeviceIdTests(unittest.TestCase):
             "speaker-1",
         )
         self.assertEqual(sleeps, [5])
+
+    def test_retries_transient_http_error(self):
+        responses = [
+            HttpError(503),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_propagates_permanent_http_error(self):
+        def fetch_devices():
+            raise HttpError(401)
+
+        with self.assertRaises(HttpError):
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=lambda seconds: self.fail(
+                    "permanent errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
 
     def test_retries_when_only_phone_devices_are_available(self):
         responses = [

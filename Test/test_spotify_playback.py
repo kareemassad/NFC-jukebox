@@ -3,6 +3,12 @@ import unittest
 from spotify_playback import play_with_retry
 
 
+class HttpError(Exception):
+    def __init__(self, http_status):
+        super().__init__(f"HTTP {http_status}")
+        self.http_status = http_status
+
+
 class PlayWithRetryTests(unittest.TestCase):
     def test_returns_device_after_successful_playback(self):
         attempts = []
@@ -43,6 +49,7 @@ class PlayWithRetryTests(unittest.TestCase):
                 play,
                 "spotify:album:42",
                 find_device,
+                retryable_exceptions=(RuntimeError,),
                 sleep=sleeps.append,
                 log=lambda message: None,
             ),
@@ -56,6 +63,22 @@ class PlayWithRetryTests(unittest.TestCase):
             ],
         )
         self.assertEqual(sleeps, [5])
+
+    def test_propagates_permanent_playback_error(self):
+        def play(context_uri, device_id):
+            raise HttpError(401)
+
+        with self.assertRaises(HttpError):
+            play_with_retry(
+                play,
+                "spotify:album:42",
+                lambda: "speaker-1",
+                retryable_exceptions=(HttpError,),
+                sleep=lambda seconds: self.fail(
+                    "permanent errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
 
 
 if __name__ == "__main__":

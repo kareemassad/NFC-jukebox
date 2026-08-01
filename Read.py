@@ -123,6 +123,7 @@ try:
                 playSpotify,
                 albumInfo[0],
                 findDeviceID,
+                retryable_exceptions=(SpotifyException, RequestException),
             )
 
             # Send a note

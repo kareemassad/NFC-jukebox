@@ -36,6 +36,7 @@ def wait_for_device(
     fetch_devices,
     preferred_device_id=None,
     retry_seconds=5,
+    retryable_exceptions=(),
     sleep=time.sleep,
     log=print,
 ):
@@ -43,6 +44,8 @@ def wait_for_device(
         try:
             devices = fetch_devices()
         except Exception as error:
+            if not isinstance(error, retryable_exceptions):
+                raise
             log("Spotify device lookup failed: " + str(error))
             sleep(retry_seconds)
             continue

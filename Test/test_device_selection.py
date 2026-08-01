@@ -80,6 +80,7 @@ class SelectDeviceIdTests(unittest.TestCase):
         self.assertEqual(
             device_selection.wait_for_device(
                 fetch_devices,
+                retryable_exceptions=(RuntimeError,),
                 sleep=sleeps.append,
                 log=lambda message: None,
             ),
@@ -106,6 +107,19 @@ class SelectDeviceIdTests(unittest.TestCase):
             "computer-1",
         )
         self.assertEqual(sleeps, [5])
+
+    def test_propagates_unconfigured_device_lookup_error(self):
+        def fetch_devices():
+            raise ValueError("invalid device response")
+
+        with self.assertRaises(ValueError):
+            device_selection.wait_for_device(
+                fetch_devices,
+                sleep=lambda seconds: self.fail(
+                    "unexpected errors must not be retried"
+                ),
+                log=lambda message: None,
+            )
 
 
 if __name__ == "__main__":

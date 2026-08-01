@@ -10,8 +10,10 @@ import spotipy
 import time
 import webbrowser
 import spotipy.util as util
+from requests.exceptions import RequestException
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
+from spotipy.exceptions import SpotifyException
 from device_selection import wait_for_device
 from spotify_playback import play_with_retry
 
@@ -67,6 +69,7 @@ def findDeviceID():
     return wait_for_device(
         lambda: spotifyObject.devices().get("devices", []),
         preferred_device_id=PREFERRED_DEVICE_ID,
+        retryable_exceptions=(SpotifyException, RequestException),
     )
 
 

@@ -13,6 +13,7 @@ import spotipy.util as util
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
 from device_selection import wait_for_device
+from spotify_playback import play_with_retry
 
 
 def getSpotifyInfo(ID):
@@ -114,14 +115,12 @@ try:
             print("That id represents this album: " + albumInfo[2])
             if albumInfo == False:
                 sys.exit()
-            # get device to play on
-            deviceID = findDeviceID()
-            if deviceID is None:
-                print("No non-phone Spotify device available. Retrying in 5 seconds.")
-                time.sleep(5)
-                continue
             # play the album
-            playSpotify(albumInfo[0], deviceID)
+            deviceID = play_with_retry(
+                playSpotify,
+                albumInfo[0],
+                findDeviceID,
+            )
 
             # Send a note
             note_title = "Played " + albumInfo[2]

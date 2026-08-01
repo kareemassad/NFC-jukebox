@@ -86,7 +86,11 @@ scope = "user-read-private user-modify-playback-state user-read-playback-state"
 pb = PushBullet(pushbullet_api_key) if pushbullet_api_key else None
 
 # Get a list of devices
-devices = pb.getDevices() if pb else []
+try:
+    devices = pb.getDevices() if pb else []
+except Exception as error:
+    print("Pushbullet notifications unavailable: " + str(error))
+    devices = []
 print(devices)
 
 

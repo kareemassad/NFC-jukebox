@@ -72,7 +72,7 @@ The first run asks for Spotify authorization. Complete the browser flow, then re
 
 The jukebox skips Spotify devices whose type is `phone` or `smartphone`. It selects an available non-phone Spotify Connect device, such as a computer or speaker. Pairing a Bluetooth speaker with the Pi does not make it a Spotify Connect device for this project. Use a Spotify Connect device shown by Spotify, or run a separate Spotify Connect client on the Pi.
 
-If `PUSHBULLET_API_KEY` is set, configure at least one Pushbullet target device. If the key is unset or the account has no target device, playback continues without notifications.
+If `PUSHBULLET_API_KEY` is set, configure at least one Pushbullet target device. If the key is unset, invalid, unavailable, or the account has no target device, playback continues without notifications.
 
 ## Register tags
 

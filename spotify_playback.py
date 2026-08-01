@@ -1,6 +1,6 @@
 import time
 
-from spotify_retry import get_retry_after_seconds, is_retryable_playback_exception
+from spotify_retry import RetryPolicy, is_retryable_playback_exception
 
 
 def play_with_retry(
@@ -14,10 +14,8 @@ def play_with_retry(
     sleep=time.sleep,
     log=print,
 ):
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1")
-
-    for attempt in range(max_attempts):
+    policy = RetryPolicy(max_attempts, retry_seconds, sleep, log)
+    while policy.start_attempt():
         device_id = find_device()
         if device_id is None:
             log("No playback device available after maximum attempts.")
@@ -30,10 +28,11 @@ def play_with_retry(
                 error, retryable_no_status_exceptions
             ):
                 raise
-            if attempt + 1 == max_attempts:
-                log("Spotify playback failed after maximum attempts.")
+            if not policy.wait(
+                error,
+                retry_message="Spotify playback failed: " + str(error),
+                exhausted_message="Spotify playback failed after maximum attempts.",
+            ):
                 return None
-            log("Spotify playback failed: " + str(error))
-            sleep(get_retry_after_seconds(error, retry_seconds))
 
     return None

@@ -114,6 +114,30 @@ class SelectDeviceIdTests(unittest.TestCase):
         )
         self.assertEqual(sleeps, [17.0])
 
+    def test_uses_default_for_non_finite_retry_after(self):
+        responses = [
+            HttpError(429, headers={"Retry-After": "NaN"}),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                retryable_exceptions=(HttpError,),
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
     def test_retries_transient_http_error(self):
         responses = [
             HttpError(503),

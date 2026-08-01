@@ -1,8 +1,13 @@
 #!/bin/sh
-# launcher.sh
-# navigate to home directory, then to this directory, then execute python script, then back home
+set -eu
 
-cd /
-cd home/pi/git/NFC-jukebox
-sudo python3 Read.py
-cd /
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PYTHON="$SCRIPT_DIR/.venv/bin/python"
+
+if [ ! -x "$PYTHON" ]; then
+    echo "Missing $PYTHON. Complete the installation steps first." >&2
+    exit 1
+fi
+
+cd "$SCRIPT_DIR"
+exec sudo -E "$PYTHON" "$SCRIPT_DIR/Read.py"

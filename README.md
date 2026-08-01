@@ -53,24 +53,26 @@ The application imports `mfrc522.SimpleMFRC522`. This module is not in `requirem
 1. Create an application in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
 2. Add this redirect URI to the application:
 
-   `http://localhost:8888/callback`
+   `http://127.0.0.1:8888/callback`
 
-3. Open `Read.py` and set the local Spotify and Pushbullet values:
+3. Set the local values in the shell that will start the reader:
 
-   ```python
-   client_id = "your-client-id"
-   client_secret = "your-client-secret"
-   username = "your-spotify-username"
-   pushbullet_api_key = "your-pushbullet-key"
+   ```bash
+   export SPOTIFY_CLIENT_ID='your-client-id'
+   export SPOTIFY_CLIENT_SECRET='your-client-secret'
+   export SPOTIFY_USERNAME='your-spotify-username'
+   export PUSHBULLET_API_KEY='your-pushbullet-key'
    ```
 
-   The Pushbullet value must be a quoted key. The placeholder in the source causes a `NameError` until it is replaced, or the Pushbullet code is disabled.
+   `PUSHBULLET_API_KEY` is optional. Leave it unset to disable notifications.
 
-4. Keep these values and the Spotify token cache out of Git.
+4. Keep these values and the Spotify token cache out of Git. Do not edit credentials into `Read.py`.
 
-The first run asks for Spotify authorization. Complete the browser flow, then return to the Pi. The Spotify account must have access to the target playback device.
+The first run asks for Spotify authorization. Complete the browser flow, then return to the Pi. The account must have Spotify Premium and access to the target playback device.
 
-The jukebox skips Spotify devices whose type is `phone` or `smartphone`. It selects an available non-phone Spotify Connect device, such as a computer or speaker. Bluetooth pairing is an operating-system task; pair and test the Pi audio device before starting the jukebox.
+The jukebox skips Spotify devices whose type is `phone` or `smartphone`. It selects an available non-phone Spotify Connect device, such as a computer or speaker. Pairing a Bluetooth speaker with the Pi does not make it a Spotify Connect device for this project. Use a Spotify Connect device shown by Spotify, or run a separate Spotify Connect client on the Pi.
+
+If `PUSHBULLET_API_KEY` is set, configure at least one Pushbullet target device. If the key is unset or the account has no target device, playback continues without notifications.
 
 ## Register tags
 
@@ -96,7 +98,7 @@ The written text is not used for album lookup. Playback uses the tag UID and the
 Activate the virtual environment and start the reader:
 
 ```bash
-cd /home/pi/git/NFC-jukebox
+cd /path/to/NFC-jukebox
 . .venv/bin/activate
 python3 Read.py
 ```
@@ -110,12 +112,13 @@ chmod +x launcher.sh
 ./launcher.sh
 ```
 
-The launcher assumes the project is at `/home/pi/git/NFC-jukebox` and uses `sudo`. Edit that path if the project is installed elsewhere. Running `Read.py` directly from the activated environment is the recommended method.
+The launcher finds its own project directory and runs `.venv/bin/python`. It does not assume a `pi` account or a fixed clone path. It uses `sudo -E` so the exported configuration values remain available. Running `Read.py` directly from the activated environment is the recommended method.
 
 ## Troubleshooting
 
 - `ModuleNotFoundError: RPi.GPIO` or `spidev`: install the Pi packages above and recreate the virtual environment with `--system-site-packages`.
 - `ModuleNotFoundError: mfrc522`: install the RC522 library that provides `mfrc522.SimpleMFRC522`.
-- Spotify authorization fails: check the client ID, client secret, username, and exact redirect URI.
+- `Set SPOTIFY_CLIENT_ID before starting Read.py.`: export all required values in the same shell that starts the reader.
+- Spotify authorization fails: check the client ID, client secret, username, and exact loopback redirect URI.
 - No audio plays: confirm that Spotify shows the computer or speaker as an available Spotify Connect device. A phone is skipped.
 - A tag is not mapped: confirm that its UID is in `spotifyURICollection.csv` and that the first header is exactly `ID`.

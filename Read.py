@@ -67,20 +67,26 @@ def findDeviceID():
     )
 
 
-# exposing api key for now will get new and reset when done
-client_id = "47b1df84dd804a17a77ddab564c05f79"
-client_secret = "67681af49c0041959131bad5973529b6"
-redirect_uri = "http://localhost:8888/callback"
-pushbullet_api_key = YOUR_KEY_HERE
+def required_env(name):
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(f"Set {name} before starting Read.py.")
+    return value
 
-username = "22wtiqz6ow2wcjaoopq5k4vyy"
+
+client_id = required_env("SPOTIFY_CLIENT_ID")
+client_secret = required_env("SPOTIFY_CLIENT_SECRET")
+redirect_uri = "http://127.0.0.1:8888/callback"
+pushbullet_api_key = os.environ.get("PUSHBULLET_API_KEY")
+
+username = required_env("SPOTIFY_USERNAME")
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
 
 # PushBullet SMS module
-pb = PushBullet(pushbullet_api_key)
+pb = PushBullet(pushbullet_api_key) if pushbullet_api_key else None
 
 # Get a list of devices
-devices = pb.getDevices()
+devices = pb.getDevices() if pb else []
 print(devices)
 
 
@@ -133,7 +139,10 @@ try:
             # Send a note
             note_title = "Played " + albumInfo[2]
             note_body = "Song played on " + deviceID
-            pb.pushNote(devices[0]["iden"], note_title, note_body)
+            if pb and devices:
+                pb.pushNote(devices[0]["iden"], note_title, note_body)
+            else:
+                print("Pushbullet notifications are disabled or have no target device.")
 
         usedID = id
         # slight time delay to handle requests better

@@ -114,7 +114,7 @@ chmod +x launcher.sh
 ./launcher.sh
 ```
 
-The launcher finds its own project directory and runs `.venv/bin/python`. It does not assume a `pi` account or a fixed clone path. It passes only the documented configuration values to the root process. Running `Read.py` directly from the activated environment is the recommended method.
+The launcher finds its own project directory and runs `.venv/bin/python` as root for Pi hardware access. It does not assume a `pi` account or a fixed clone path. It passes only the documented configuration values to the root process. The launcher and direct run commands use separate token caches in the current user's home directory. If you switch between them, complete Spotify authorization once in each mode.
 
 ## Troubleshooting
 

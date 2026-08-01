@@ -10,7 +10,7 @@ if [ ! -x "$PYTHON" ]; then
 fi
 
 cd "$SCRIPT_DIR"
-exec sudo /usr/bin/env \
+exec sudo \
     SPOTIFY_CLIENT_ID="${SPOTIFY_CLIENT_ID-}" \
     SPOTIFY_CLIENT_SECRET="${SPOTIFY_CLIENT_SECRET-}" \
     SPOTIFY_USERNAME="${SPOTIFY_USERNAME-}" \

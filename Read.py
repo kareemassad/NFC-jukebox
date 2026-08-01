@@ -81,6 +81,9 @@ pushbullet_api_key = os.environ.get("PUSHBULLET_API_KEY")
 
 username = required_env("SPOTIFY_USERNAME")
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
+token_cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "nfc-jukebox")
+os.makedirs(token_cache_dir, exist_ok=True)
+token_cache_path = os.path.join(token_cache_dir, f"spotify-{username}")
 
 # PushBullet SMS module
 pb = None
@@ -96,15 +99,15 @@ print(devices)
 
 
 # authentication
-# remember to add cache to .gitignore
+# Store the cache outside the project so root and non-root runs do not share ownership.
 try:
     token = util.prompt_for_user_token(
-        username, scope, client_id, client_secret, redirect_uri
+        username, scope, client_id, client_secret, redirect_uri, token_cache_path
     )
 except (AttributeError, JSONDecodeError):
-    os.remove(f".cache-{username}")
+    os.remove(token_cache_path)
     token = util.prompt_for_user_token(
-        username, scope, client_id, client_secret, redirect_uri
+        username, scope, client_id, client_secret, redirect_uri, token_cache_path
     )
 
 # create a spotify object

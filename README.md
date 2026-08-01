@@ -81,7 +81,7 @@ ID,Artist,Album,URI,Count
 622616457857,The Beach Boys,Smiley Smile,spotify:album:37rNuexqEXWeSIOiJtn3A9,0
 ```
 
-`ID` is the tag UID printed by the reader. Make sure the first header is exactly `ID`. Save the CSV as UTF-8 without a BOM so the current reader can parse the header.
+`ID` is the tag UID printed by the reader. Make sure the first header is exactly `ID`. The reader loads this file as `cp1252` (Windows-1252). Save the CSV as `cp1252` without a BOM. Plain ASCII text is also safe.
 
 `Write.py` can write text to a tag:
 

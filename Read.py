@@ -4,15 +4,18 @@ import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 import csv
 import os
-import sys
 import json
 import spotipy
 import time
 import webbrowser
 import spotipy.util as util
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import RequestException, Timeout
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
-from device_selection import select_device_id
+from spotipy.exceptions import SpotifyException
+from device_selection import wait_for_device
+from spotify_playback import play_with_retry
 from catalog import find_album
 
 
@@ -50,13 +53,18 @@ def playSpotify(contextURI, deviceID):
 
 
 PREFERRED_DEVICE_ID = "31876612233caf235184b622d80c84b51b39cc36"
+MAX_RETRY_ATTEMPTS = 12
 
 
 def findDeviceID():
     """Return the preferred or first available non-phone Spotify device."""
-    result = spotifyObject.devices()
-    available_devices = result.get("devices", [])
-    return select_device_id(available_devices, PREFERRED_DEVICE_ID)
+    return wait_for_device(
+        lambda: spotifyObject.devices().get("devices", []),
+        preferred_device_id=PREFERRED_DEVICE_ID,
+        retryable_exceptions=(SpotifyException, RequestException),
+        retryable_no_status_exceptions=(RequestsConnectionError, Timeout),
+        max_attempts=MAX_RETRY_ATTEMPTS,
+    )
 
 
 # exposing api key for now will get new and reset when done
@@ -108,14 +116,19 @@ try:
                 continue
 
             print("That id represents this album: " + albumInfo[2])
-            # get device to play on
-            deviceID = findDeviceID()
-            if deviceID is None:
-                print("No non-phone Spotify device available. Retrying in 5 seconds.")
-                time.sleep(5)
-                continue
             # play the album
-            playSpotify(albumInfo[0], deviceID)
+            deviceID = play_with_retry(
+                playSpotify,
+                albumInfo[0],
+                findDeviceID,
+                retryable_exceptions=(SpotifyException, RequestException),
+                retryable_no_status_exceptions=(RequestsConnectionError, Timeout),
+                max_attempts=MAX_RETRY_ATTEMPTS,
+            )
+
+            if deviceID is None:
+                print("No playback device available. Waiting for the next tag.")
+                continue
 
             # Send a note
             note_title = "Played " + albumInfo[2]

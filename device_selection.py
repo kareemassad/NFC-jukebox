@@ -1,3 +1,5 @@
+import time
+
 from collections.abc import Mapping
 
 
@@ -28,3 +30,26 @@ def select_device_id(devices, preferred_device_id=None):
     if eligible_device_ids:
         return eligible_device_ids[0]
     return None
+
+
+def wait_for_device(
+    fetch_devices,
+    preferred_device_id=None,
+    retry_seconds=5,
+    sleep=time.sleep,
+    log=print,
+):
+    while True:
+        try:
+            devices = fetch_devices()
+        except Exception as error:
+            log("Spotify device lookup failed: " + str(error))
+            sleep(retry_seconds)
+            continue
+
+        device_id = select_device_id(devices, preferred_device_id)
+        if device_id is not None:
+            return device_id
+
+        log("No non-phone Spotify device available. Retrying in 5 seconds.")
+        sleep(retry_seconds)

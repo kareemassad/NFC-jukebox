@@ -1,5 +1,6 @@
 import unittest
 
+import device_selection
 from device_selection import select_device_id
 
 
@@ -62,6 +63,49 @@ class SelectDeviceIdTests(unittest.TestCase):
         ]
 
         self.assertEqual(select_device_id(devices), "speaker-1")
+
+    def test_retries_after_device_lookup_error(self):
+        responses = [
+            RuntimeError("Spotify is offline"),
+            [{"id": "speaker-1", "type": "speaker"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "speaker-1",
+        )
+        self.assertEqual(sleeps, [5])
+
+    def test_retries_when_only_phone_devices_are_available(self):
+        responses = [
+            [{"id": "phone-1", "type": "smartphone"}],
+            [{"id": "computer-1", "type": "computer"}],
+        ]
+        sleeps = []
+
+        def fetch_devices():
+            return responses.pop(0)
+
+        self.assertEqual(
+            device_selection.wait_for_device(
+                fetch_devices,
+                sleep=sleeps.append,
+                log=lambda message: None,
+            ),
+            "computer-1",
+        )
+        self.assertEqual(sleeps, [5])
 
 
 if __name__ == "__main__":

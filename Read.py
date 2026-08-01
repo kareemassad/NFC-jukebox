@@ -12,7 +12,7 @@ import webbrowser
 import spotipy.util as util
 from json.decoder import JSONDecodeError
 from pushbullet.pushbullet import PushBullet
-from device_selection import select_device_id
+from device_selection import wait_for_device
 
 
 def getSpotifyInfo(ID):
@@ -63,9 +63,10 @@ PREFERRED_DEVICE_ID = "31876612233caf235184b622d80c84b51b39cc36"
 
 def findDeviceID():
     """Return the preferred or first available non-phone Spotify device."""
-    result = spotifyObject.devices()
-    available_devices = result.get("devices", [])
-    return select_device_id(available_devices, PREFERRED_DEVICE_ID)
+    return wait_for_device(
+        lambda: spotifyObject.devices().get("devices", []),
+        preferred_device_id=PREFERRED_DEVICE_ID,
+    )
 
 
 # exposing api key for now will get new and reset when done

@@ -44,8 +44,11 @@ def is_retryable_playback_exception(error, no_status_exceptions=()):
         str(getattr(error, attribute, ""))
         for attribute in ("msg", "reason")
     ).lower().replace("_", " ")
-    return "device" in message and (
-        "not found" in message
-        or "not available" in message
-        or "unavailable" in message
+    return "no active device" in message or (
+        "device" in message
+        and (
+            "not found" in message
+            or "not available" in message
+            or "unavailable" in message
+        )
     )

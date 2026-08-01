@@ -71,7 +71,7 @@ class PlayWithRetryTests(unittest.TestCase):
         def play(context_uri, device_id):
             attempts.append((context_uri, device_id))
             if len(attempts) == 1:
-                raise HttpError(404, "Device not found")
+                raise HttpError(404, "NO_ACTIVE_DEVICE")
 
         self.assertEqual(
             play_with_retry(

@@ -134,7 +134,6 @@ try:
 
             if deviceID is None:
                 print("No playback device available. Waiting for the next tag.")
-                usedID = id
                 continue
 
             # Send a note

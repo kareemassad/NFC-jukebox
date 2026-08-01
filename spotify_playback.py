@@ -17,7 +17,7 @@ def play_with_retry(
         try:
             play(context_uri, device_id)
             return device_id
-        except Exception as error:
+        except retryable_exceptions as error:
             if not is_retryable_exception(error, retryable_exceptions):
                 raise
             log("Spotify playback failed: " + str(error))

@@ -59,7 +59,7 @@ def wait_for_device(
     while True:
         try:
             devices = fetch_devices()
-        except Exception as error:
+        except retryable_exceptions as error:
             if not is_retryable_exception(error, retryable_exceptions):
                 raise
             log("Spotify device lookup failed: " + str(error))

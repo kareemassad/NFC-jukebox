@@ -85,7 +85,7 @@ ID,Artist,Album,URI,Count
 622616457857,The Beach Boys,Smiley Smile,spotify:album:37rNuexqEXWeSIOiJtn3A9,0
 ```
 
-`ID` is the tag UID printed by the reader. Make sure the first header is exactly `ID`. The reader loads this file as `cp1252` (Windows-1252). Save the CSV as `cp1252` without a BOM. Plain ASCII text is also safe.
+`ID` is the tag UID printed by the reader. Make sure the first header is exactly `ID`. The reader loads this file as UTF-8. Save the CSV as UTF-8.
 
 `Write.py` can write text to a tag:
 
@@ -106,7 +106,7 @@ chmod +x launcher.sh
 ./launcher.sh
 ```
 
-The launcher uses `.venv/bin/python` with `sudo` for Pi hardware access. The launcher finds its own project directory. It does not assume a `pi` account or a fixed clone path. Do not run `Read.py` directly for normal operation. Stop the reader with `Ctrl+C`.
+The launcher uses `.venv/bin/python` with `sudo` for Pi hardware access. It preserves only the four documented environment variables. Do not run `Read.py` directly for normal operation. Stop the reader with `Ctrl+C`.
 
 ## Troubleshooting
 

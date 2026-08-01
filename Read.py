@@ -34,7 +34,7 @@ def getSpotifyInfo(ID):
         album (String): A spotify album name pulled from a .csv file that directly coressponds to a specific id.
     """
 
-    file = open("spotifyURICollection.csv", encoding="cp1252")
+    file = open("spotifyURICollection.csv", encoding="utf-8-sig")
     csv_file = csv.DictReader(file)
     return find_album(csv_file, ID)
 

@@ -83,14 +83,15 @@ username = required_env("SPOTIFY_USERNAME")
 scope = "user-read-private user-modify-playback-state user-read-playback-state"
 
 # PushBullet SMS module
-pb = PushBullet(pushbullet_api_key) if pushbullet_api_key else None
-
-# Get a list of devices
-try:
-    devices = pb.getDevices() if pb else []
-except Exception as error:
-    print("Pushbullet notifications unavailable: " + str(error))
-    devices = []
+pb = None
+devices = []
+if pushbullet_api_key:
+    try:
+        pb = PushBullet(pushbullet_api_key)
+        devices = pb.getDevices()
+    except Exception as error:
+        print("Pushbullet notifications unavailable: " + str(error))
+        pb = None
 print(devices)
 
 
@@ -146,7 +147,10 @@ try:
             note_title = "Played " + albumInfo[2]
             note_body = "Song played on " + deviceID
             if pb and devices:
-                pb.pushNote(devices[0]["iden"], note_title, note_body)
+                try:
+                    pb.pushNote(devices[0]["iden"], note_title, note_body)
+                except Exception as error:
+                    print("Pushbullet notification failed: " + str(error))
             else:
                 print("Pushbullet notifications are disabled or have no target device.")
 

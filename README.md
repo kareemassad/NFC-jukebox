@@ -114,7 +114,7 @@ chmod +x launcher.sh
 ./launcher.sh
 ```
 
-The launcher finds its own project directory and runs `.venv/bin/python`. It does not assume a `pi` account or a fixed clone path. It uses `sudo -E` so the exported configuration values remain available. Running `Read.py` directly from the activated environment is the recommended method.
+The launcher finds its own project directory and runs `.venv/bin/python`. It does not assume a `pi` account or a fixed clone path. It passes only the documented configuration values to the root process. Running `Read.py` directly from the activated environment is the recommended method.
 
 ## Troubleshooting
 

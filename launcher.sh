@@ -10,4 +10,9 @@ if [ ! -x "$PYTHON" ]; then
 fi
 
 cd "$SCRIPT_DIR"
-exec sudo -E "$PYTHON" "$SCRIPT_DIR/Read.py"
+exec sudo /usr/bin/env \
+    SPOTIFY_CLIENT_ID="${SPOTIFY_CLIENT_ID-}" \
+    SPOTIFY_CLIENT_SECRET="${SPOTIFY_CLIENT_SECRET-}" \
+    SPOTIFY_USERNAME="${SPOTIFY_USERNAME-}" \
+    PUSHBULLET_API_KEY="${PUSHBULLET_API_KEY-}" \
+    "$PYTHON" "$SCRIPT_DIR/Read.py"

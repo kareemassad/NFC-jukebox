@@ -46,7 +46,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-The application imports `mfrc522.SimpleMFRC522`. This module is not in `requirements.txt`. Install or copy the RC522 Python library that provides this import before running the project. The included `MFRC522.py` file is the low-level driver and does not provide the `mfrc522` import by itself.
+The requirements file pins the `mfrc522` package at version `0.0.7`. It provides `mfrc522.SimpleMFRC522`, which is the import used by `Read.py` and `Write.py`. The included `MFRC522.py` file is a separate low-level driver.
 
 ## Configure Spotify
 

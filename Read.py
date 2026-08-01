@@ -98,7 +98,9 @@ try:
     )
 except (AttributeError, JSONDecodeError):
     os.remove(f".cache-{username}")
-    token = util.prompt_for_user_token(username, scope)
+    token = util.prompt_for_user_token(
+        username, scope, client_id, client_secret, redirect_uri
+    )
 
 # create a spotify object
 spotifyObject = spotipy.Spotify(auth=token)

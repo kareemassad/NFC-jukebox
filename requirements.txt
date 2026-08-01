@@ -3,6 +3,7 @@ pep8==1.7.1
 pipenv==2022.1.8
 pushbullet==0.1
 pushbullet.py==0.11.0
+mfrc522==0.0.7
 pycodestyle==2.6.0
 pycparser==2.20
 spotipy==2.25.2

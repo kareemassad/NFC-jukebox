@@ -1,13 +1,8 @@
 import unittest
 
 import device_selection
+from Test.helpers import HttpError
 from device_selection import select_device_id
-
-
-class HttpError(Exception):
-    def __init__(self, http_status):
-        super().__init__(f"HTTP {http_status}")
-        self.http_status = http_status
 
 
 class SelectDeviceIdTests(unittest.TestCase):

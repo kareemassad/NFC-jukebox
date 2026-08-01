@@ -1,12 +1,7 @@
 import unittest
 
+from Test.helpers import HttpError
 from spotify_playback import play_with_retry
-
-
-class HttpError(Exception):
-    def __init__(self, http_status):
-        super().__init__(f"HTTP {http_status}")
-        self.http_status = http_status
 
 
 class PlayWithRetryTests(unittest.TestCase):

@@ -4,7 +4,6 @@ import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 import csv
 import os
-import sys
 import json
 import spotipy
 import time
@@ -17,6 +16,7 @@ from pushbullet.pushbullet import PushBullet
 from spotipy.exceptions import SpotifyException
 from device_selection import wait_for_device
 from spotify_playback import play_with_retry
+from catalog import find_album
 
 
 def getSpotifyInfo(ID):
@@ -36,17 +36,7 @@ def getSpotifyInfo(ID):
 
     file = open("spotifyURICollection.csv", encoding="cp1252")
     csv_file = csv.DictReader(file)
-    for row in csv_file:
-        # print(row['ID'])
-        # DONE: concantinate ID to a string
-        if str(ID) == row["ID"]:
-            uri = row["URI"]
-            artist = row["Artist"]
-            album = row["Album"]
-            print(uri)
-            return uri, artist, album
-    # Base Case
-    return False
+    return find_album(csv_file, ID)
 
 
 def playSpotify(contextURI, deviceID):
@@ -119,9 +109,13 @@ try:
         if usedID != id:
             # access data in URI variable
             albumInfo = getSpotifyInfo(id)
+            if albumInfo is None:
+                print("No album is configured for this NFC tag.")
+                usedID = id
+                time.sleep(2)
+                continue
+
             print("That id represents this album: " + albumInfo[2])
-            if albumInfo == False:
-                sys.exit()
             # play the album
             deviceID = play_with_retry(
                 playSpotify,
